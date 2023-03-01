@@ -16,6 +16,7 @@ async function run() {
     try {
         const appointmentOptionCollection = client.db("mayoClinic").collection("appointmentOptions")
         const bookingsCollection = client.db("mayoClinic").collection("bookings")
+        const usersCollection = client.db("mayoClinic").collection("users")
 
         app.get('/appointmentOptions', async (req, res) => {
             const date = req.query.date;
@@ -90,6 +91,15 @@ async function run() {
          * app.delete('/bookings/:id')
         */
 
+        app.get('/bookings', async (req, res) => {
+            const email = req.query.email;
+            const query = {
+                email: email
+            }
+            const result = await bookingsCollection.find(query).toArray()
+            res.send(result)
+        })
+
         app.post('/bookings', async (req, res) => {
             const booking = req.body;
             console.log(booking);
@@ -108,6 +118,13 @@ async function run() {
 
             const result = await bookingsCollection.insertOne(booking);
             res.send(result);
+        })
+
+
+        app.post("/users", async (req, res) => {
+            const user = req.body;
+            const result = await usersCollection.insertOne(user);
+            res.send(result)
         })
 
     }
