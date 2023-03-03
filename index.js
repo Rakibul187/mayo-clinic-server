@@ -33,6 +33,7 @@ async function run() {
         const appointmentOptionCollection = client.db("mayoClinic").collection("appointmentOptions")
         const bookingsCollection = client.db("mayoClinic").collection("bookings")
         const usersCollection = client.db("mayoClinic").collection("users")
+        const doctorsCollection = client.db("mayoClinic").collection("doctors")
 
         app.get('/appointmentOptions', async (req, res) => {
             const date = req.query.date;
@@ -98,6 +99,12 @@ async function run() {
             res.send(options);
         })
 
+        app.get("/appointmentSpecialty", async (req, res) => {
+            const query = {};
+            const result = await appointmentOptionCollection.find(query).project({ name: 1 }).toArray();
+            res.send(result)
+        })
+
         /***
          * API Naming Convention 
          * app.get('/bookings')
@@ -148,7 +155,8 @@ async function run() {
             const user = await usersCollection.findOne(query);
 
             if (user) {
-                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: "1h" })
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN)
+                // const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: "1h" })
                 return res.send({
                     accessToken: token
                 })
@@ -194,6 +202,26 @@ async function run() {
                 }
             };
             const result = await usersCollection.updateOne(filter, updatedDoc, options)
+            res.send(result)
+        })
+
+        app.get("/doctors", async (req, res) => {
+            const query = {}
+            const result = await doctorsCollection.find(query).toArray();
+            res.send(result)
+        })
+        app.post("/doctors", async (req, res) => {
+            const doctor = req.body;
+            const result = await doctorsCollection.insertOne(doctor);
+            res.send(result)
+        })
+
+        app.delete("/doctors/:id", async (req, res) => {
+            const id = req.params.id;
+            const filter = {
+                _id: new ObjectId(id)
+            }
+            const result = await doctorsCollection.deleteOne(filter);
             res.send(result)
         })
 
